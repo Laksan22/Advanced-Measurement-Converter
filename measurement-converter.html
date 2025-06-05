@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Measurement Converter</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
+            --background-color: #f5f6fa;
+            --text-color: #333;
+            --border-radius: 8px;
+            --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+        }
+
+        .converter-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            background: white;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            box-shadow: var(--box-shadow);
+        }
+
+        .tab-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .tab-button.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .converter-box {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-converter {
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .swap-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .swap-btn:hover {
+            transform: rotate(180deg);
+        }
+
+        .all-conversions {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-grow: 1;
+        }
+
+        .conversion-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .conversion-item .unit {
+            font-weight: 500;
+        }
+
+        .conversion-item .value {
+            color: var(--primary-color);
+        }
+
+        .formula-display {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .input-group {
+                grid-template-columns: 1fr;
+            }
+
+            .swap-btn {
+                transform: rotate(90deg);
+                margin: 1rem auto;
+            }
+
+            .swap-btn:hover {
+                transform: rotate(270deg);
+            }
+
+            .all-conversions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Advanced Measurement Converter</h1>
+            <p>Comprehensive conversion tool with real-time calculations</p>
+        </header>
+
+        <div class="converter-tabs">
+            <button class="tab-button active" data-type="length">Length</button>
+            <button class="tab-button" data-type="weight">Weight</button>
+            <button class="tab-button" data-type="temperature">Temperature</button>
+            <button class="tab-button" data-type="area">Area</button>
+            <button class="tab-button" data-type="volume">Volume</button>
+            <button class="tab-button" data-type="speed">Speed</button>
+            <button class="tab-button" data-type="time">Time</button>
+            <button class="tab-button" data-type="digital">Digital</button>
+        </div>
+
+        <div class="converter-box">
+            <div class="main-converter">
+                <div class="input-group">
+                    <div class="input-container">
+                        <input type="number" id="fromValue" placeholder="Enter value">
+                        <select id="fromUnit"></select>
+                    </div>
+                    
+                    <button class="swap-btn" id="swapBtn">⇄</button>
+                    
+                    <div class="input-container">
+                        <input type="number" id="toValue" readonly>
+                        <select id="toUnit"></select>
+                    </div>
+                </div>
+                
+                <div class="formula-display" id="formulaDisplay"></div>
+            </div>
+
+            <div class="all-conversions" id="allConversions">
+                <!-- Conversion items will be added here dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Extended conversion units
+        const conversionData = {
+            length: {
+                'nanometer': 1e9,
+                'micrometer': 1e6,
+                'millimeter': 1000,
+                'centimeter': 100,
+                'decimeter': 10,
+                'meter': 1,
+                'decameter': 0.1,
+                'hectometer': 0.01,
+                'kilometer': 0.001,
+                'inch': 39.3701,
+                'foot': 3.28084,
+                'yard': 1.09361,
+                'mile': 0.000621371,
+                'nautical mile': 0.000539957,
+                'light year': 1.057e-16
+            },
+            weight: {
+                'microgram': 1e9,
+                'milligram': 1e6,
+                'centigram': 1e5,
+                'decigram': 1e4,
+                'gram': 1000,
+                'decagram': 100,
+                'hectogram': 10,
+                'kilogram': 1,
+                'metric ton': 0.001,
+                'ounce': 35.274,
+                'pound': 2.20462,
+                'stone': 0.157473,
+                'short ton': 0.00110231,
+                'long ton': 0.000984207
+            },
+            temperature: {
+                'celsius': 'base',
+                'fahrenheit': 'special',
+                'kelvin': 'special',
+                'rankine': 'special',
+                'reaumur': 'special'
+            },
+            area: {
+                'square millimeter': 1e6,
+                'square centimeter': 10000,
+                'square meter': 1,
+                'square kilometer': 0.000001,
+                'hectare': 0.0001,
+                'acre': 0.000247105,
+                'square foot': 10.7639,
+                'square yard': 1.19599,
+                'square mile': 3.861e-7
+            },
+            volume: {
+                'cubic millimeter': 1e9,
+                'cubic centimeter': 1e6,
+                'milliliter': 1e6,
+                'liter': 1000,
+                'cubic meter': 1,
+                'cubic kilometer': 1e-9,
+                'cubic inch': 61023.7,
+                'cubic foot': 35.3147,
+                'cubic yard': 1.30795,
+                'gallon (US)': 264.172,
+                'quart (US)': 1056.69,
+                'pint (US)': 2113.38,
+                'cup (US)': 4226.75,
+                'fluid ounce (US)': 33814,
+                'tablespoon (US)': 67628,
+                'teaspoon (US)': 202884
+            },
+            speed: {
+                'meter per second': 1,
+                'kilometer per hour': 3.6,
+                'mile per hour': 2.23694,
+                'foot per second': 3.28084,
+                'knot': 1.94384,
+                'mach': 0.00293858
+            },
+            time: {
+                'nanosecond': 1e9,
+                'microsecond': 1e6,
+                'millisecond': 1000,
+                'second': 1,
+                'minute': 0.0166667,
+                'hour': 0.000277778,
+                'day': 1.15741e-5,
+                'week': 1.65344e-6,
+                'month': 3.80517e-7,
+                'year': 3.171e-8,
+                'decade': 3.171e-9,
+                'century': 3.171e-10
+            },
+            digital: {
+                'bit': 8,
+                'byte': 1,
+                'kilobyte': 0.001,
+                'megabyte': 1e-6,
+                'gigabyte': 1e-9,
+                'terabyte': 1e-12,
+                'petabyte': 1e-15,
+                'exabyte': 1e-18
+            }
+        };
+
+        // Current converter type
+        let currentType = 'length';
+
+        // DOM Elements
+        const fromValue = document.getElementById('fromValue');
+        const toValue = document.getElementById('toValue');
+        const fromUnit = document.getElementById('fromUnit');
+        const toUnit = document.getElementById('toUnit');
+        const swapBtn = document.getElementById('swapBtn');
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const formulaDisplay = document.getElementById('formulaDisplay');
+        const allConversions = document.getElementById('allConversions');
+
+        // Initialize the converter
+        function initializeConverter() {
+            // Set up event listeners
+            fromValue.addEventListener('input', convert);
+            fromUnit.addEventListener('change', convert);
+            toUnit.addEventListener('change', convert);
+            swapBtn.addEventListener('click', swapUnits);
+
+            // Set up tab buttons
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentType = btn.dataset.type;
+                    updateUnitOptions();
+                    convert();
+                });
+            });
+
+            // Initialize unit options
+            updateUnitOptions();
+        }
+
+        // Update unit options based on current type
+        function updateUnitOptions() {
+            const units = Object.keys(conversionData[currentType]);
+            
+            // Clear existing options
+            fromUnit.innerHTML = '';
+            toUnit.innerHTML = '';
+            
+            // Add new options
+            units.forEach(unit => {
+                fromUnit.add(new Option(unit, unit));
+                toUnit.add(new Option(unit, unit));
+            });
+            
+            // Set default "to" unit to something different than "from" unit
+            if (units.length > 1) {
+                toUnit.selectedIndex = 1;
+            }
+
+            // Clear values
+            fromValue.value = '';
+            toValue.value = '';
+            formulaDisplay.textContent = '';
+            allConversions.innerHTML = '';
+        }
+
+        // Swap units and values
+        function swapUnits() {
+            const tempValue = fromValue.value;
+            const tempUnit = fromUnit.value;
+            
+            fromUnit.value = toUnit.value;
+            toUnit.value = tempUnit;
+            
+            if (tempValue) {
+                fromValue.value = toValue.value;
+                convert();
+            }
+        }
+
+        // Perform the conversion
+        function convert() {
+            if (!fromValue.value) {
+                toValue.value = '';
+                formulaDisplay.textContent = '';
+                allConversions.innerHTML = '';
+                return;
+            }
+
+            const from = fromUnit.value;
+            const value = parseFloat(fromValue.value);
+
+            if (currentType === 'temperature') {
+                convertTemperature(value, from);
+            } else {
+                convertStandard(value, from);
+            }
+        }
+
+        // Convert standard units
+        function convertStandard(value, from) {
+            const units = Object.keys(conversionData[currentType]);
+            allConversions.innerHTML = '';
+
+            // Convert to all units
+            units.forEach(to => {
+                const ratio = conversionData[currentType][to] / conversionData[currentType][from];
+                const result = (value * ratio).toFixed(6);
+                
+                // Create conversion item
+                const item = document.createElement('div');
+                item.className = 'conversion-item';
+                item.innerHTML = `
+                    <span class="unit">${to}:</span>
+                    <span class="value">${result}</span>
+                `;
+                allConversions.appendChild(item);
+
+                // Update main conversion if it matches selected 'to' unit
+                if (to === toUnit.value) {
+                    toValue.value = result;
+                    formulaDisplay.textContent = `Formula: ${value} ${from} × ${ratio.toFixed(6)} = ${result} ${to}`;
+                }
+            });
+        }
+
+        // Special handling for temperature conversions
+        function convertTemperature(value, from) {
+            const units = Object.keys(conversionData.temperature);
+            allConversions.innerHTML = '';
+
+            // Convert to all temperature units
+            units.forEach(to => {
+                const result = convertTemperatureUnit(value, from, to);
+                
+                // Create conversion item
+                const item = document.createElement('div');
+                item.className = 'conversion-item';
+                item.innerHTML = `
+                    <span class="unit">${to}:</span>
+                    <span class="value">${result.value}</span>
+                `;
+                allConversions.appendChild(item);
+
+                // Update main conversion if it matches selected 'to' unit
+                if (to === toUnit.value) {
+                    toValue.value = result.value;
+                    formulaDisplay.textContent = `Formula: ${result.formula}`;
+                }
+            });
+        }
+
+        // Convert between temperature units
+        function convertTemperatureUnit(value, from, to) {
+            let celsius;
+            let formula = '';
+            
+            // Convert to Celsius first
+            switch (from) {
+                case 'celsius':
+                    celsius = value;
+                    formula = `${value}°C`;
+                    break;
+                case 'fahrenheit':
+                    celsius = (value - 32) * 5/9;
+                    formula = `(${value}°F - 32) × 5/9 = ${celsius.toFixed(2)}°C`;
+                    break;
+                case 'kelvin':
+                    celsius = value - 273.15;
+                    formula = `${value}K - 273.15 = ${celsius.toFixed(2)}°C`;
+                    break;
+                case 'rankine':
+                    celsius = (value - 491.67) * 5/9;
+                    formula = `(${value}°R - 491.67) × 5/9 = ${celsius.toFixed(2)}°C`;
+                    break;
+                case 'reaumur':
+                    celsius = value * 1.25;
+                    formula = `${value}°Ré × 1.25 = ${celsius.toFixed(2)}°C`;
+                    break;
+            }
+            
+            // Convert from Celsius to target unit
+            let result;
+            switch (to) {
+                case 'celsius':
+                    result = celsius;
+                    if (from !== 'celsius') {
+                        formula += ` = ${result.toFixed(2)}°C`;
+                    }
+                    break;
+                case 'fahrenheit':
+                    result = (celsius * 9/5) + 32;
+                    formula += ` → (${celsius.toFixed(2)}°C × 9/5) + 32 = ${result.toFixed(2)}°F`;
+                    break;
+                case 'kelvin':
+                    result = celsius + 273.15;
+                    formula += ` → ${celsius.toFixed(2)}°C + 273.15 = ${result.toFixed(2)}K`;
+                    break;
+                case 'rankine':
+                    result = (celsius + 273.15) * 9/5;
+                    formula += ` → (${celsius.toFixed(2)}°C + 273.15) × 9/5 = ${result.toFixed(2)}°R`;
+                    break;
+                case 'reaumur':
+                    result = celsius * 0.8;
+                    formula += ` → ${celsius.toFixed(2)}°C × 0.8 = ${result.toFixed(2)}°Ré`;
+                    break;
+            }
+
+            return {
+                value: result.toFixed(2),
+                formula: formula
+            };
+        }
+
+        // Initialize the converter when the page loads
+        document.addEventListener('DOMContentLoaded', initializeConverter);
+    </script>
+</body>
+</html> 
